@@ -78,7 +78,7 @@ namespace Baikal
                                   {
                                       material = default_material;
                                   }
-                                  
+
                                   // Push to stack as an initializer
                                   material_stack.push(material);
                                   
@@ -110,6 +110,15 @@ namespace Baikal
         
         // Commit stuff (we can iterate over it after commit has happened)
         m_material_collector.Commit();
+
+#ifdef COLLECT_DATA
+		auto it = m_material_collector.CreateIterator();
+		while (it->IsValid())
+		{
+			std::cout << m_material_collector.GetItemIndex(it->ItemAs<Material>()) << ": " << it->ItemAs<Material>()->GetName() << std::endl;
+			it->Next();
+		}
+#endif
 
         // set iterator position at begin
         shape_iter->Reset();
@@ -152,6 +161,7 @@ namespace Baikal
                                   // Emplace all dependent textures
                                   for (; tex_iter->IsValid(); tex_iter->Next())
                                   {
+									  std::cout << tex_iter->ItemAs<Texture>()->GetName() << std::endl;
                                       textures.emplace(tex_iter->ItemAs<Texture>());
                                   }
                                   

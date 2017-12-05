@@ -302,6 +302,11 @@ KERNEL void ShadeSurface(
     GLOBAL ray* restrict indirect_rays,
     // Radiance
     GLOBAL float3* restrict output
+	#ifdef COLLECT_DATA
+	,
+	GLOBAL int* mat_idx,
+	GLOBAL float3* pxl_normals
+	#endif
 )
 {
     int global_id = get_global_id(0);
@@ -359,6 +364,11 @@ KERNEL void ShadeSurface(
         // Check if we are hitting from the inside
         float ngdotwi = dot(diffgeo.ng, wi);
         bool backfacing = ngdotwi < 0.f;
+
+		#ifdef COLLECT_DATA
+		mat_idx[global_id] = diffgeo.material_index;
+		pxl_normals[global_id] = diffgeo.ng;
+		#endif
 
         // Select BxDF 
         Material_Select(&scene, wi, &sampler, TEXTURE_ARGS, SAMPLER_ARGS, &diffgeo);

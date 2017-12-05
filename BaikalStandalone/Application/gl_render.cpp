@@ -72,6 +72,12 @@ namespace Baikal
                 glBindVertexArray(0);
 
                 glFinish(); CHECK_GL_ERROR;
+
+#ifdef COLLECT_DATA
+				GLubyte *data = new GLubyte[3 * w * h];
+				glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+				delete[] data;
+#endif
             }
         }
         catch (std::runtime_error& e)

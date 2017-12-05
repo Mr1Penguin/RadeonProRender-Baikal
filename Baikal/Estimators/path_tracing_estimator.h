@@ -256,5 +256,9 @@ namespace Baikal
 
         std::unique_ptr<RenderData> m_render_data;
         mutable std::uint32_t m_sample_counter;
+#ifdef COLLECT_DATA
+		CLWBuffer<int> mat_idx;
+		CLWBuffer<float3> pxl_normals;
+#endif
     };
 }

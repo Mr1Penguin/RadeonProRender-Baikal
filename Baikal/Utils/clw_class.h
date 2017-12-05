@@ -75,6 +75,10 @@ namespace Baikal
             ""
 #endif
         );
+
+#ifdef COLLECT_DATA
+		opts.append("-D COLLECT_DATA ");
+#endif 
     }
 
     inline std::string ClwClass::GetFullBuildOpts() const {

@@ -242,8 +242,34 @@ namespace Baikal
             // Shade hits
             ShadeVolume(scene, pass, num_estimates, output, use_output_indices);
 
+#ifdef COLLECT_DATA
+			auto k = num_estimates;
+			mat_idx = GetContext().CreateBuffer<int>(((k + 63) / 64) * 64, CL_MEM_READ_WRITE);
+			pxl_normals = GetContext().CreateBuffer<float3>(num_estimates, CL_MEM_READ_WRITE);
+			auto pn = new float3[num_estimates];
+
+			auto ii = new int[((k + 63) / 64) * 64];
+#endif
+
             // Shade hits
             ShadeSurface(scene, pass, num_estimates, output, use_output_indices);
+
+#ifdef COLLECT_DATA
+			GetContext().ReadBuffer(0, pxl_normals, pn, num_estimates).Wait();
+			GetContext().ReadBuffer(0, mat_idx, ii, ((k + 63) / 64) * 64).Wait();
+			//Baikal::ClwScene::Material iii = new Baikal::ClwScene::Material[scene.materials.GetElementCount()];
+			//GetContext().ReadBuffer(0, clwscene.materials, iii, clwscene.materialids.GetElementCount()).Wait();
+
+			if (pass == 0) {
+				auto pxl_num = 0;
+				std::cout << "idx[" << ii[pxl_num] << "]:" /*<< iii[ii[pxl_num]]*/ << "\n";
+				std::cout << pxl_num << " " << num_estimates << " " << "nrml[" << pxl_num << "]:" << pn[pxl_num].x << ", " << pn[pxl_num].y << ", " << pn[pxl_num].z << "\n" ;
+			}
+
+			delete[] ii;
+			//delete[] iii;
+			delete[] pn;
+#endif
 
             // Shade missing rays
             if (pass == 0)
@@ -345,6 +371,10 @@ namespace Baikal
         shadekernel.SetArg(argc++, m_render_data->paths);
         shadekernel.SetArg(argc++, m_render_data->rays[(pass + 1) & 0x1]);
         shadekernel.SetArg(argc++, output);
+#ifdef COLLECT_DATA
+		shadekernel.SetArg(argc++, mat_idx);
+		shadekernel.SetArg(argc++, pxl_normals);
+#endif
 
         // Run shading kernel
         {
